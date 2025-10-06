@@ -2,23 +2,15 @@
 
 Fullstack проект на Django + Next.js для продажи авторских ножей и топоров ручной работы.
 
-## Текущий статус: Этап 1 - Backend MVP ✅
-
-### Реализовано:
-- Модели: Category, Product, ProductImage
-- Django Admin с кастомизацией
-- REST API для товаров и категорий
-- Фильтрация, поиск, сортировка
-- Docker Compose инфраструктура
-- PostgreSQL + Redis + Celery
-
-## Быстрый старт
+## Быстрый старт (полностью автоматизирован)
 ```bash
-# 1. Запуск проекта
+# 1. Запуск проекта (всё настроится автоматически)
 docker-compose up -d --build
 
-# 2. Создание суперпользователя
-docker-compose exec backend python manage.py createsuperuser
-
-# 3. Открыть админку
+# 2. Откройте админку
 # http://localhost:8000/admin/
+# Логин: admin
+# Пароль: Str0ngP@ssw0rd!
+
+# 3. API доступно по адресу
+# http://localhost:8000/api/products/
