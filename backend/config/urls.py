@@ -7,7 +7,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/products/', include('products.urls')),
-    path('api/', include('orders.urls')),  # Добавлено для корзины и заказов
+    path('api/', include('orders.urls')),
+    path('api/', include('reviews.urls')),  # Добавлено для отзывов
     # Остальные URL будут добавлены позже
 ]
 

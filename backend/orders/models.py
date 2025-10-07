@@ -158,7 +158,8 @@ class Order(models.Model):
         'Сумма заказа',
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(0)]
+        validators=[MinValueValidator(0)],
+        default=0  # ДОБАВЛЕНО: значение по умолчанию
     )
     discount_amount = models.DecimalField(
         'Скидка',
@@ -202,7 +203,11 @@ class Order(models.Model):
     
     def get_final_amount(self):
         """Итоговая сумма с учетом доставки и скидки"""
-        return self.total_amount + self.delivery_cost - self.discount_amount
+        # ИСПРАВЛЕНО: проверка на None
+        total = self.total_amount or 0
+        delivery = self.delivery_cost or 0
+        discount = self.discount_amount or 0
+        return total + delivery - discount
     
     def get_items_total(self):
         """Сумма всех товаров"""
