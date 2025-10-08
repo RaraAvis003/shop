@@ -1,3 +1,4 @@
+# backend/orders/admin.py - ИСПРАВЛЕННАЯ ВЕРСИЯ
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
@@ -12,7 +13,10 @@ class CartItemInline(admin.TabularInline):
     can_delete = False
     
     def total_price(self, obj):
-        return f"₽ {obj.get_total_price()}"
+        # ИСПРАВЛЕНО: Проверка на существование объекта
+        if obj.pk:
+            return f"₽ {obj.get_total_price()}"
+        return "—"
     total_price.short_description = 'Сумма'
 
 
@@ -35,12 +39,15 @@ class CartAdmin(admin.ModelAdmin):
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    extra = 0
-    readonly_fields = ['product', 'quantity', 'price', 'total_price']
-    can_delete = False
+    extra = 1  # ИЗМЕНЕНО: Добавлена возможность добавлять товары
+    readonly_fields = ['total_price']
+    fields = ['product', 'quantity', 'price', 'total_price']
     
     def total_price(self, obj):
-        return f"₽ {obj.get_total_price()}"
+        # ИСПРАВЛЕНО: Проверка на существование объекта и заполненность полей
+        if obj.pk and obj.price is not None and obj.quantity is not None:
+            return f"₽ {obj.get_total_price()}"
+        return "—"
     total_price.short_description = 'Сумма'
 
 
