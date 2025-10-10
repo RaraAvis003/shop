@@ -101,24 +101,6 @@ class CartViewSet(viewsets.ViewSet):
         cart = self.get_cart(request)
         cart.clear()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
-    @action(detail=False, methods=['post'])
-    def apply_promo(self, request):
-        """Применить промокод (заглушка, будет реализовано позже)"""
-        promo_code = request.data.get('promo_code', '').strip()
-        
-        if not promo_code:
-            return Response(
-                {'error': 'Промокод не указан'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # TODO: Реализовать проверку промокода через модель Promotion
-        # Пока заглушка
-        return Response({
-            'message': 'Промокод применен',
-            'discount': 0
-        })
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -185,9 +167,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             delivery_address=serializer.validated_data.get('delivery_address', ''),
             delivery_cost=delivery_cost,
             comment=serializer.validated_data.get('comment', ''),
-            promo_code=serializer.validated_data.get('promo_code', ''),
-            total_amount=cart.get_total(),
-            discount_amount=0  # TODO: Рассчитать из промокода
+            total_amount=cart.get_total()
         )
         
         # Создать позиции заказа из корзины

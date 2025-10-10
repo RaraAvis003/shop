@@ -1,4 +1,4 @@
-# backend/orders/admin.py - ИСПРАВЛЕННАЯ ВЕРСИЯ
+# backend/orders/admin.py - БЕЗ ПРОМОКОДОВ
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
@@ -13,7 +13,6 @@ class CartItemInline(admin.TabularInline):
     can_delete = False
     
     def total_price(self, obj):
-        # ИСПРАВЛЕНО: Проверка на существование объекта
         if obj.pk:
             return f"₽ {obj.get_total_price()}"
         return "—"
@@ -39,12 +38,11 @@ class CartAdmin(admin.ModelAdmin):
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    extra = 1  # ИЗМЕНЕНО: Добавлена возможность добавлять товары
+    extra = 1
     readonly_fields = ['total_price']
     fields = ['product', 'quantity', 'price', 'total_price']
     
     def total_price(self, obj):
-        # ИСПРАВЛЕНО: Проверка на существование объекта и заполненность полей
         if obj.pk and obj.price is not None and obj.quantity is not None:
             return f"₽ {obj.get_total_price()}"
         return "—"
@@ -74,6 +72,7 @@ class OrderAdmin(admin.ModelAdmin):
     ]
     inlines = [OrderItemInline]
     
+    # ИСПРАВЛЕНО: Удалено поле promo_code
     fieldsets = (
         ('Информация о заказе', {
             'fields': ('user', 'status', 'created_at', 'updated_at')
@@ -92,8 +91,6 @@ class OrderAdmin(admin.ModelAdmin):
         ('Стоимость', {
             'fields': (
                 'total_amount',
-                'discount_amount',
-                'promo_code',
                 'final_amount_display'
             )
         }),

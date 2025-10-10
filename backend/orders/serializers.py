@@ -113,9 +113,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'delivery_address',
             'delivery_cost',
             'total_amount',
-            'discount_amount',
             'final_amount',
-            'promo_code',
             'status',
             'status_display',
             'comment',
@@ -150,9 +148,6 @@ class CreateOrderSerializer(serializers.Serializer):
     delivery_method = serializers.ChoiceField(choices=Order.DELIVERY_CHOICES)
     delivery_address = serializers.CharField(required=False, allow_blank=True)
     comment = serializers.CharField(required=False, allow_blank=True)
-    
-    # Промокод
-    promo_code = serializers.CharField(required=False, allow_blank=True)
     
     def validate_phone(self, value):
         """Валидация российского номера телефона"""

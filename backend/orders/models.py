@@ -83,6 +83,8 @@ class CartItem(models.Model):
     
     def get_total_price(self):
         """Сумма за позицию"""
+        if not self.product or not self.product.price:
+            return 0
         return self.product.price * self.quantity
     
     def reserve(self, hours=24):
@@ -159,15 +161,8 @@ class Order(models.Model):
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        default=0  # ДОБАВЛЕНО: значение по умолчанию
-    )
-    discount_amount = models.DecimalField(
-        'Скидка',
-        max_digits=10,
-        decimal_places=2,
         default=0
     )
-    promo_code = models.CharField('Промокод', max_length=50, blank=True)
     
     # Статус
     status = models.CharField(
@@ -203,7 +198,6 @@ class Order(models.Model):
     
     def get_final_amount(self):
         """Итоговая сумма с учетом доставки и скидки"""
-        # ИСПРАВЛЕНО: проверка на None
         total = self.total_amount or 0
         delivery = self.delivery_cost or 0
         discount = self.discount_amount or 0
@@ -272,6 +266,8 @@ class OrderItem(models.Model):
     
     def get_total_price(self):
         """Сумма за позицию"""
+        if self.price is None or self.quantity is None:
+            return 0
         return self.price * self.quantity
 
 
@@ -328,101 +324,3 @@ class Payment(models.Model):
     
     def __str__(self):
         return f"Платеж {self.payment_id} - {self.get_status_display()}"
-    
-class OrderItem(models.Model):
-    """Товар в заказе"""
-    order = models.ForeignKey(
-        Order,
-        on_delete=models.CASCADE,
-        related_name='items',
-        verbose_name='Заказ'
-    )
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.PROTECT,
-        verbose_name='Товар'
-    )
-    quantity = models.PositiveIntegerField(
-        'Количество',
-        validators=[MinValueValidator(1)]
-    )
-    price = models.DecimalField(
-        'Цена на момент заказа',
-        max_digits=10,
-        decimal_places=2,
-        validators=[MinValueValidator(0)]
-    )
-    
-    class Meta:
-        verbose_name = 'Товар в заказе'
-        verbose_name_plural = 'Товары в заказе'
-    
-    def __str__(self):
-        return f"{self.product.name} x{self.quantity}"
-    
-    def get_total_price(self):
-        """Сумма за позицию"""
-        # ИСПРАВЛЕНО: Проверка на None для работы в админ-панели
-        if self.price is None or self.quantity is None:
-            return 0
-        return self.price * self.quantity
-
-
-class CartItem(models.Model):
-    """Товар в корзине"""
-    cart = models.ForeignKey(
-        Cart,
-        on_delete=models.CASCADE,
-        related_name='items',
-        verbose_name='Корзина'
-    )
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        verbose_name='Товар'
-    )
-    quantity = models.PositiveIntegerField(
-        'Количество',
-        default=1,
-        validators=[MinValueValidator(1)]
-    )
-    reserved_until = models.DateTimeField(
-        'Зарезервировано до',
-        null=True,
-        blank=True
-    )
-    created_at = models.DateTimeField('Добавлен', auto_now_add=True)
-    updated_at = models.DateTimeField('Обновлен', auto_now=True)
-    
-    class Meta:
-        verbose_name = 'Товар в корзине'
-        verbose_name_plural = 'Товары в корзине'
-        unique_together = ['cart', 'product']
-    
-    def __str__(self):
-        return f"{self.product.name} x{self.quantity}"
-    
-    def get_total_price(self):
-        """Сумма за позицию"""
-        # ИСПРАВЛЕНО: Проверка на None для работы в админ-панели
-        if not self.product or not self.product.price:
-            return 0
-        return self.product.price * self.quantity
-    
-    def reserve(self, hours=24):
-        """Зарезервировать товар"""
-        if self.product.stock_status == 'in_stock':
-            self.reserved_until = timezone.now() + timedelta(hours=hours)
-            self.save(update_fields=['reserved_until'])
-    
-    def is_reserved(self):
-        """Проверка, зарезервирован ли товар"""
-        if not self.reserved_until:
-            return False
-        return timezone.now() < self.reserved_until
-    
-    def save(self, *args, **kwargs):
-        # Автоматическое резервирование при добавлении товара "в наличии"
-        if not self.pk and self.product.stock_status == 'in_stock':
-            self.reserved_until = timezone.now() + timedelta(hours=24)
-        super().save(*args, **kwargs)

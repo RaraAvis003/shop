@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'products',
     'orders',
     'reviews',
-    'promotions',
     'wishlist',
 ]
 
@@ -214,7 +213,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGS_DIR / 'django.log',  # Используем LOGS_DIR
+            'filename': LOGS_DIR / 'django.log',
             'maxBytes': 10485760,  # 10MB
             'backupCount': 5,
             'formatter': 'verbose',
